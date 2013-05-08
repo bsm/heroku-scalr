@@ -11,7 +11,6 @@ module Heroku
 
       def initialize(argv)
         super()
-        @redis_url   = "redis://127.0.0.1:6379/0"
         @config_path = "./config.rb"
         @options     = {}
         parser.parse!(argv)
@@ -26,10 +25,6 @@ module Heroku
         @parser ||= OptionParser.new do |o|
           o.banner = "Usage: heroku-scalr [options]"
           o.separator ""
-
-          o.on("-R", "--redis URI", "Connect to redis on this address. Default: redis://127.0.0.1:6379/0") do |uri|
-            @redis_url = URI.parse(uri).to_s
-          end
 
           o.on("-C", "--config PATH", "Configuration file path. Default: ./config.rb") do |path|
             @config_path = path
