@@ -3,7 +3,7 @@ require 'logger'
 
 module Heroku
   module Scalr
-    module CLI
+    class CLI
 
       def self.run!(argv = ARGV)
         new(argv).run!

@@ -1,4 +1,5 @@
 class Heroku::Scalr::Runner
+  SIGNALS = %w[HUP INT TERM] & Signal.list.keys
 
   attr_reader :config
 
@@ -11,6 +12,7 @@ class Heroku::Scalr::Runner
   def timers
     @timers ||= Timers.new.tap do |t|
       config.apps.each do |app|
+        app.log :info, "monitoring every #{app.interval}s"
         t.every(app.interval) { app.scale! }
       end
     end
@@ -18,7 +20,16 @@ class Heroku::Scalr::Runner
 
   # Start the runner
   def run!
+    SIGNALS.each do |sig|
+      Signal.trap(sig) { stop! }
+    end
     loop { timers.wait }
+  end
+
+  # Stop execution
+  def stop!
+    Heroku::Scalr.logger.info "Exiting ..."
+    exit(0)
   end
 
 end

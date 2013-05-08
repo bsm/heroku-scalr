@@ -53,7 +53,7 @@ class Heroku::Scalr::App
   def scale!
     scale_at = next_scale_attempt
     if Time.now < scale_at
-      log :debug, "skip scaling, next attempt: #{scale_at}"
+      log :debug, "skip scaling, next attempt in #{(scale_at - Time.now).to_i}s"
       return
     end
 
@@ -71,6 +71,12 @@ class Heroku::Scalr::App
     elsif wait >= wait_high
       do_scale(1)
     end
+  end
+
+  # @param [Symbol] level
+  # @param [String] message
+  def log(level, message)
+    Heroku::Scalr.logger.send(level, "[#{name}] #{message}")
   end
 
   protected
@@ -109,10 +115,6 @@ class Heroku::Scalr::App
     end
 
   private
-
-    def log(level, message)
-      Heroku::Scalr.logger.send(level, "#{name} - #{message}")
-    end
 
     def fail(message)
       raise ArgumentError, "Invalid options: #{message}"
