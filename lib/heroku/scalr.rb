@@ -16,7 +16,7 @@ module Heroku::Scalr
   # @options opts [String] :log_level custom log level
   def configure(opts = {})
     @logger = Logger.new(opts[:log_file]) if opts[:log_file]
-    @logger.level = opts[:log_level] if opts[:log_level]
+    logger.level = opts[:log_level] if opts[:log_level]
     self
   end
 

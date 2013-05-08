@@ -12,8 +12,13 @@ module Heroku
       def initialize(argv)
         super()
         @config_path = "./config.rb"
-        @options     = {}
+        @options     = { log_level: ::Logger::INFO }
         parser.parse!(argv)
+
+        unless File.file?(@config_path)
+          puts parser
+          exit
+        end
       end
 
       def run!
