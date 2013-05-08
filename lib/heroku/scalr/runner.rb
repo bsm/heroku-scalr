@@ -1,24 +1,23 @@
 class Heroku::Scalr::Runner
 
-  attr_reader :config, :timers
+  attr_reader :config
 
   # @param [String] config_path configuration file location
   def initialize(config_path)
     @config = Heroku::Scalr::Config.new(config_path)
-    @timers = Timers.new  
   end
 
-  # @return [Array<Heroku::Scalr::App>] configured apps
-  def apps
-    config.apps
+  # @return [Timers] recurring timers
+  def timers
+    @timers ||= Timers.new.tap do |t|
+      config.apps.each do |app|
+        t.every(app.interval) { app.scale! }
+      end
+    end
   end
 
   # Start the runner
   def run!
-    apps.each do |app|
-      timers.every(app.interval) { app.scale! }
-    end
-
     loop { timers.wait }
   end
 

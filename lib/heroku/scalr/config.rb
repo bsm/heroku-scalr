@@ -7,10 +7,12 @@
 #
 class Heroku::Scalr::Config
 
+  attr_reader :apps
+
   # @param [String] path file path containing a configuration
   def initialize(path)
     @defaults = {}
-    @apps     = {}
+    @apps     = []
     instance_eval File.read(path)
   end
 
@@ -24,7 +26,7 @@ class Heroku::Scalr::Config
   # @param [Hash] opts configuration options
   # @see Heroku::Scalr::App#initialize for a full set of options
   def app(name, opts = {})
-    opts = DEFAULTS.merge(@defaults).merge(opts)
+    opts = @defaults.merge(opts)
     @apps << Heroku::Scalr::App.new(name, opts)
   end
 
