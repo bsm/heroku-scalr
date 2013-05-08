@@ -23,11 +23,11 @@ describe Heroku::Scalr::App do
 
   describe "failures" do
     it "should raise error when there's no API key" do
-      expect { described_class.new("name") }.to raise_error('Invalid options: no API key given')
+      expect { described_class.new("name") }.to raise_error(ArgumentError)
     end
 
     it "should raise error when min_dynos < 1" do
-      expect { described_class.new("name", {:api_key => 'key', :min_dynos => 0}) }.to raise_error('Invalid options: min_dynos must be at least 1')
+      expect { described_class.new("name", {:api_key => 'key', :min_dynos => 0}) }.to raise_error(ArgumentError)
     end
 
     it "should raise error when max_dynos < 1" do
@@ -35,7 +35,7 @@ describe Heroku::Scalr::App do
     end
 
     it "should raise error when interval < 10" do
-      expect { described_class.new("name", {:api_key => 'key', :interval => 9}) }.to raise_error('Invalid options: interval must be at least 10')
+      expect { described_class.new("name", {:api_key => 'key', :interval => 9}) }.to raise_error(ArgumentError)
     end
   end
 
