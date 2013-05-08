@@ -1,13 +1,29 @@
 require 'heroku/api'
 require 'logger'
+require 'excon'
 
 module Heroku::Scalr
+  extend self
 
   # @see Heroku::Scalr::Runner#initialize
-  def self.run!(*args)
+  def run!(*args)
     EM.run do
       Heroku::Scalr::Runner.new(*args).run!
     end
+  end
+
+  # @param [Hash] opts
+  # @options opts [String] :log_file custom log file path
+  # @options opts [String] :log_level custom log level
+  def configure(opts = {})
+    @logger = Logger.new(opts[:log_file]) if opts[:log_file]
+    @logger.level = opts[:log_level] if opts[:log_level]
+    self
+  end
+
+  # @return [Logger] the logger instance
+  def logger
+    @logger ||= Logger.new(STDOUT)
   end
 
 end

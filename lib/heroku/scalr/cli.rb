@@ -18,7 +18,8 @@ module Heroku
 
       def run!
         require 'heroku/scalr'
-        Heroku::Scalr.run!(@redis_url, @config_path, self)
+        Heroku::Scalr.configure(@options)
+        Heroku::Scalr.run!(@config_path)
       end
 
       def parser
