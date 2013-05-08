@@ -9,7 +9,7 @@ class Heroku::Scalr::App
     min_frequency: 60
   }.freeze
 
-  attr_reader :name, :http, :interval, :min_dynos, :max_dynos,
+  attr_reader :name, :http, :api, :interval, :min_dynos, :max_dynos,
               :wait_low, :wait_high, :min_frequency, :last_scaled_at
 
   # @param [String] name Heroku app name
@@ -38,7 +38,7 @@ class Heroku::Scalr::App
     fail("interval must be at least 10") unless opts[:interval] >= 10
 
     @http = Excon.new(opts[:url] || "http://#{@name}.herokuapp.com/robots.txt")
-    @api  = Heroku::Api.new api_key: opts[:api_key]
+    @api  = Heroku::API.new api_key: opts[:api_key]
 
     @interval  = opts[:interval].to_i
     @min_dynos = opts[:min_dynos].to_i
@@ -81,7 +81,7 @@ class Heroku::Scalr::App
     end
 
     def do_scale(by)
-      info = get_app(name)
+      info = api.get_app(name)
       unless info.status == 200
         log :warn, "error fetching app info, responded with #{info.status}"
         return
@@ -105,6 +105,7 @@ class Heroku::Scalr::App
       end
 
       @last_scaled_at = Time.now
+      target
     end
 
   private
