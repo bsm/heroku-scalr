@@ -1,5 +1,6 @@
 class Heroku::Scalr::Runner
-  attr_reader :config
+
+  attr_reader :config, :timers
 
   # @param [String] config_path configuration file location
   # @param [Hash] opts options
@@ -7,6 +8,7 @@ class Heroku::Scalr::Runner
   # @option opts [Integer] log_level log level
   def initialize(config_path, opts = {})
     @config = Heroku::Scalr::Config.new(config_path, @logger)
+    @timers = Timers.new
   end
 
   # @return [Array<Heroku::Scalr::App>] configured apps
@@ -16,13 +18,11 @@ class Heroku::Scalr::Runner
 
   # Start the runner
   def run!
-    return false if @_running
-
     apps.each do |app|
-      EM.add_periodic_timer(app.interval) { app.scale! }
+      timers.every(app.interval) { app.scale! }
     end
 
-    @_running = true
+    loop { timers.wait }
   end
 
 end

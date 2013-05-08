@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.files        = `git ls-files`.split("\n")
   s.test_files   = `git ls-files -- {test,spec,features}/*`.split("\n")
 
-  s.add_dependency "eventmachine-le"
+  s.add_dependency "timers"
   s.add_dependency "heroku-api", '~> 0.3.8'
 
   s.add_development_dependency "rake"

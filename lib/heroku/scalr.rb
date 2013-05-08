@@ -1,15 +1,14 @@
 require 'heroku/api'
 require 'logger'
 require 'excon'
+require 'timers'
 
 module Heroku::Scalr
   extend self
 
   # @see Heroku::Scalr::Runner#initialize
   def run!(*args)
-    EM.run do
-      Heroku::Scalr::Runner.new(*args).run!
-    end
+    Heroku::Scalr::Runner.new(*args).run!
   end
 
   # @param [Hash] opts
