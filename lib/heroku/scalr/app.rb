@@ -59,8 +59,9 @@ class Heroku::Scalr::App
   # Scales the app
   def scale!
     scale_at = next_scale_attempt
-    if Time.now < scale_at
-      log :debug, "skip scaling, next attempt in #{(scale_at - Time.now).to_i}s"
+    now      = Time.now
+    if now < scale_at
+      log :debug, "skip check, next attempt in #{(scale_at - now).to_i}s"
       return
     end
 
