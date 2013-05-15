@@ -26,6 +26,14 @@ module Heroku::Scalr::Metric
 
     protected
 
+      def http_get
+        Excon.head(@app.url)
+      rescue Excon::Errors::Timeout
+        Excon::Response.new(status: 598)
+      rescue Excon::Errors::Error
+        Excon::Response.new(status: 444)
+      end
+
       def compare(ms, low, high)
         ms <= low ? -1 : (ms >= high ? 1 : 0)
       end
@@ -43,7 +51,7 @@ module Heroku::Scalr::Metric
       status = nil
 
       real = Benchmark.realtime do
-        status = @app.http.get.status
+        status = http_get.status
       end
 
       unless status == 200
@@ -63,7 +71,7 @@ module Heroku::Scalr::Metric
 
     # @see Heroku::Scalr::Metric::Abstract#by
     def by
-      ms = @app.http.get.headers["X-Heroku-Queue-Wait"]
+      ms = http_get.headers["X-Heroku-Queue-Wait"]
       unless ms
         log :warn, "unable to determine queue wait time"
         return 0

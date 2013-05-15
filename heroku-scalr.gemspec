@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.name        = File.basename(__FILE__, '.gemspec')
   s.summary     = "Watch and scale your dynos!"
   s.description = "Issues recurring 'pings' to your Heroku apps and scales dynos up or down depending on pre-defined rules"
-  s.version     = "0.2.2"
+  s.version     = "0.2.3"
 
   s.authors     = ["Black Square Media"]
   s.email       = "info@blacksquaremedia.com"

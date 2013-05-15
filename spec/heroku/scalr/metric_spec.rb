@@ -15,9 +15,23 @@ end
 
 describe Heroku::Scalr::Metric::Abstract do
 
+  let!(:http_request) { stub_request(:head, "http://name.herokuapp.com/robots.txt") }
   let(:app) { Heroku::Scalr::App.new('name', api_key: 'key') }
   subject   { described_class.new(app) }
+
   its(:by)  { should == 0 }
+
+  it "should perform HTTP pings" do
+    res = subject.send(:http_get)
+    res.status.should == 200
+    http_request.should have_been_made
+  end
+
+  it "should catch HTTP errors" do
+    Excon.stub!(:head).and_raise(Excon::Errors::Timeout)
+    res = subject.send(:http_get)
+    res.status.should == 598
+  end
 
 end
 
@@ -25,7 +39,7 @@ describe Heroku::Scalr::Metric::Ping do
 
   let(:app)           { Heroku::Scalr::App.new('name', api_key: 'key') }
   let(:ping_time)     { 0.250 }
-  let!(:http_request) { stub_request(:get, "http://name.herokuapp.com/robots.txt") }
+  let!(:http_request) { stub_request(:head, "http://name.herokuapp.com/robots.txt") }
 
   subject   { described_class.new(app) }
   before    { Benchmark.stub(:realtime).and_yield.and_return(ping_time) }
@@ -58,7 +72,7 @@ describe Heroku::Scalr::Metric::Ping do
   describe "failed requests" do
 
     let! :http_request do
-      stub_request(:get, "http://name.herokuapp.com/robots.txt").to_return(status: 404)
+      stub_request(:head, "http://name.herokuapp.com/robots.txt").to_return(status: 404)
     end
 
     it 'should not scale' do
@@ -79,7 +93,7 @@ describe Heroku::Scalr::Metric::Wait do
   describe "low queue wait time" do
 
     let! :http_request do
-      stub_request(:get, "http://name.herokuapp.com/robots.txt").to_return(body: "", headers: { "X-Heroku-Queue-Wait" => 3 })
+      stub_request(:head, "http://name.herokuapp.com/robots.txt").to_return(body: "", headers: { "X-Heroku-Queue-Wait" => 3 })
     end
 
     it 'should scale down' do
@@ -92,7 +106,7 @@ describe Heroku::Scalr::Metric::Wait do
   describe "high queue wait time" do
 
     let! :http_request do
-      stub_request(:get, "http://name.herokuapp.com/robots.txt").to_return(body: "", headers: { "X-Heroku-Queue-Wait" => 300 })
+      stub_request(:head, "http://name.herokuapp.com/robots.txt").to_return(body: "", headers: { "X-Heroku-Queue-Wait" => 300 })
     end
 
     it 'should scale up' do
@@ -105,7 +119,7 @@ describe Heroku::Scalr::Metric::Wait do
   describe "normal queue wait time" do
 
     let! :http_request do
-      stub_request(:get, "http://name.herokuapp.com/robots.txt").to_return(body: "", headers: { "X-Heroku-Queue-Wait" => 20 })
+      stub_request(:head, "http://name.herokuapp.com/robots.txt").to_return(body: "", headers: { "X-Heroku-Queue-Wait" => 20 })
     end
 
     it 'should not scale' do
@@ -118,7 +132,7 @@ describe Heroku::Scalr::Metric::Wait do
   describe "queue wait unretrievable" do
 
     let! :http_request do
-      stub_request(:get, "http://name.herokuapp.com/robots.txt")
+      stub_request(:head, "http://name.herokuapp.com/robots.txt")
     end
 
     it 'should not scale' do

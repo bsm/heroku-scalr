@@ -9,7 +9,7 @@ describe Heroku::Scalr::App do
   end
 
   its(:name)            { should == 'name' }
-  its(:http)            { should be_instance_of(Excon::Connection) }
+  its(:url)             { should == 'http://name.herokuapp.com/robots.txt' }
   its(:api)             { should be_instance_of(Heroku::API) }
   its(:metric)          { should be_instance_of(Heroku::Scalr::Metric::Ping) }
 

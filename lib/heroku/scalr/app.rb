@@ -12,7 +12,7 @@ class Heroku::Scalr::App
     min_frequency: 60
   }.freeze
 
-  attr_reader :name, :http, :api, :interval, :min_dynos, :max_dynos,
+  attr_reader :name, :url, :api, :interval, :min_dynos, :max_dynos,
               :metric, :wait_low, :wait_high, :ping_low, :ping_high,
               :min_frequency, :last_scaled_at
 
@@ -41,8 +41,8 @@ class Heroku::Scalr::App
     fail("max_dynos must be at least 1") unless opts[:max_dynos] >= 1
     fail("interval must be at least 10") unless opts[:interval] >= 10
 
-    @http = Excon.new(opts[:url] || "http://#{@name}.herokuapp.com/robots.txt")
-    @api  = Heroku::API.new api_key: opts[:api_key]
+    @url = opts[:url] || "http://#{@name}.herokuapp.com/robots.txt"
+    @api = Heroku::API.new api_key: opts[:api_key]
 
     @interval  = opts[:interval].to_i
     @min_dynos = opts[:min_dynos].to_i
