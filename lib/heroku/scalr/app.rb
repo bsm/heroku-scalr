@@ -106,7 +106,7 @@ class Heroku::Scalr::App
       end
 
       log :info, "scaling to #{target} dynos"
-      result = api.put_dynos(name, target)
+      result = api.post_ps_scale(name, "web", target)
       unless result.status == 200
         log :warn, "error scaling app, responded with #{result.status}"
         return

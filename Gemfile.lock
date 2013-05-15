@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    heroku-scalr (0.2.1)
+    heroku-scalr (0.2.2)
       heroku-api (~> 0.3.8)
       timers
 

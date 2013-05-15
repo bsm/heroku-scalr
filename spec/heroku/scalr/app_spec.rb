@@ -44,7 +44,7 @@ describe Heroku::Scalr::App do
 
   describe "scaling" do
     before do
-      subject.api.stub get_app: mock_response(200, { "dynos" => 2 }), put_dynos: mock_response(200, "")
+      subject.api.stub get_app: mock_response(200, { "dynos" => 2 }), post_ps_scale: mock_response(200, "")
       subject.metric.stub by: -1
     end
 
@@ -77,13 +77,13 @@ describe Heroku::Scalr::App do
     context "down" do
 
       it "should return the new number of dynos" do
-        subject.api.should_receive(:put_dynos).with("name", 1).and_return mock_response(200, "")
+        subject.api.should_receive(:post_ps_scale).with("name", "web", 1).and_return mock_response(200, "")
         subject.scale!.should == 1
       end
 
       it "should skip if min number of dynos reached" do
         subject.api.should_receive(:get_app).with("name").and_return mock_response(200, { "dynos" => 1 })
-        subject.api.should_not_receive(:put_dynos)
+        subject.api.should_not_receive(:post_ps_scale)
         subject.scale!.should be_nil
       end
 
@@ -94,13 +94,13 @@ describe Heroku::Scalr::App do
       before { subject.metric.stub by: 1 }
 
       it "should return the new number of dynos" do
-        subject.api.should_receive(:put_dynos).with("name", 3).and_return mock_response(200, "")
+        subject.api.should_receive(:post_ps_scale).with("name", "web", 3).and_return mock_response(200, "")
         subject.scale!.should == 3
       end
 
       it "should skip if max number of dynos reached" do
         subject.api.should_receive(:get_app).with("name").and_return mock_response(200, { "dynos" => 3 })
-        subject.api.should_not_receive(:put_dynos)
+        subject.api.should_not_receive(:post_ps_scale)
         subject.scale!.should be_nil
       end
 
