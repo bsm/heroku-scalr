@@ -53,6 +53,12 @@ describe Heroku::Scalr::App do
       subject.scale!.should be_nil
     end
 
+    it "should log errors" do
+      subject.api.should_receive(:get_app).and_raise(RuntimeError, "API Error")
+      Heroku::Scalr.logger.should_receive(:error)
+      subject.scale!.should be_nil
+    end
+
     it "should determine scale through metric" do
       subject.metric.should_receive(:by).and_return(-1)
       subject.scale!.should == 1

@@ -65,6 +65,11 @@ class Heroku::Scalr::App
     end
 
     do_scale(metric.by)
+  rescue => e
+    msg = "#{e.class}: #{e.to_s}"
+    msg << "\n\t" << e.backtrace.join("\n\t") if e.backtrace
+    log :error, msg
+    nil
   end
 
   # @param [Symbol] level

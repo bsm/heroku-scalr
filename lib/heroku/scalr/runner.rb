@@ -23,6 +23,7 @@ class Heroku::Scalr::Runner
     SIGNALS.each do |sig|
       Signal.trap(sig) { stop! }
     end
+
     loop { timers.wait }
   end
 
