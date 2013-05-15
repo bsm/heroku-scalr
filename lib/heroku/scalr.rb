@@ -2,6 +2,7 @@ require 'heroku/api'
 require 'logger'
 require 'excon'
 require 'timers'
+require 'benchmark'
 
 module Heroku::Scalr
   extend self
@@ -27,6 +28,6 @@ module Heroku::Scalr
 
 end
 
-%w|config app runner|.each do |name|
+%w|config app runner metric|.each do |name|
   require "heroku/scalr/#{name}"
 end

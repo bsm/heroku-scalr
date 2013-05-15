@@ -6,11 +6,15 @@ class Heroku::Scalr::App
     max_dynos: 2,
     wait_low: 10,
     wait_high: 100,
+    ping_low: 200,
+    ping_high: 500,
+    metric: :ping,
     min_frequency: 60
   }.freeze
 
   attr_reader :name, :http, :api, :interval, :min_dynos, :max_dynos,
-              :wait_low, :wait_high, :min_frequency, :last_scaled_at
+              :metric, :wait_low, :wait_high, :ping_low, :ping_high,
+              :min_frequency, :last_scaled_at
 
   # @param [String] name Heroku app name
   # @param [Hash] opts options
@@ -45,6 +49,9 @@ class Heroku::Scalr::App
     @max_dynos = opts[:max_dynos].to_i
     @wait_low  = opts[:wait_low].to_i
     @wait_high = opts[:wait_high].to_i
+    @ping_low  = opts[:ping_low].to_i
+    @ping_high = opts[:ping_high].to_i
+    @metric    = Heroku::Scalr::Metric.new(opts[:metric], self)
     @min_frequency  = opts[:min_frequency].to_i
     @last_scaled_at = Time.at(0)
   end
@@ -57,20 +64,7 @@ class Heroku::Scalr::App
       return
     end
 
-    wait = http.get.headers["X-Heroku-Queue-Wait"]
-    unless wait
-      log :warn, "unable to determine queue wait time"
-      return
-    end
-
-    wait = wait.to_i
-    log :debug, "current queue wait time: #{wait}ms"
-
-    if wait <= wait_low
-      do_scale(-1)
-    elsif wait >= wait_high
-      do_scale(1)
-    end
+    do_scale(metric.by)
   end
 
   # @param [Symbol] level
@@ -81,12 +75,15 @@ class Heroku::Scalr::App
 
   protected
 
+
     # @return [Time] the next scale attempt
     def next_scale_attempt
       last_scaled_at + min_frequency
     end
 
     def do_scale(by)
+      return if by.zero?
+
       info = api.get_app(name)
       unless info.status == 200
         log :warn, "error fetching app info, responded with #{info.status}"
