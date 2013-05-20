@@ -11,7 +11,7 @@ describe Heroku::Scalr::Config do
   it 'should merge defaults into app configurations' do
     app = subject.apps.first
     app.should be_instance_of(Heroku::Scalr::App)
-    app.api.instance_variable_get(:@api_key).should == "API_KEY"
+    app.api_key.should == "API_KEY"
   end
 
 end
