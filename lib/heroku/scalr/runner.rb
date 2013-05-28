@@ -23,6 +23,7 @@ class Heroku::Scalr::Runner
     SIGNALS.each do |sig|
       Signal.trap(sig) { stop! }
     end
+    Signal.trap("USR1") { Heroku::Scalr.logger.reopen }
 
     loop { timers.wait }
   end

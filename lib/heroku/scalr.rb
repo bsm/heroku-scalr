@@ -28,6 +28,6 @@ module Heroku::Scalr
 
 end
 
-%w|config app runner metric|.each do |name|
+%w|core_ext config app runner metric|.each do |name|
   require "heroku/scalr/#{name}"
 end
