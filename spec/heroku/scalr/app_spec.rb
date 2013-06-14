@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Heroku::Scalr::App do
 
-  subject    { described_class.new('name', api_key: 'key', max_dynos: 3) }
+  subject    { described_class.new('name', api_key: 'key', max_dynos: 3, heat_freq: 30) }
 
   def mock_response(status, body)
     mock "APIResponse", status: status, headers: {}, body: body
@@ -20,7 +20,8 @@ describe Heroku::Scalr::App do
   its(:wait_high)       { should be(100) }
   its(:ping_low)        { should be(200) }
   its(:ping_high)       { should be(500) }
-  its(:min_frequency)   { should be(60) }
+  its(:heat_freq)       { should be(30) }
+  its(:cool_freq)       { should be(180) }
   its(:last_scaled_at)  { should == Time.at(0)}
 
 
@@ -82,12 +83,19 @@ describe Heroku::Scalr::App do
     context "down" do
 
       it "should return the new number of dynos" do
+        subject.instance_variable_set :@last_scaled_at, (Time.now - 185)
         mock_api.should_receive(:post_ps_scale).with("name", "web", 1).and_return mock_response(200, "")
         subject.scale!.should == 1
       end
 
       it "should skip if min number of dynos reached" do
         mock_api.should_receive(:get_app).with("name").and_return mock_response(200, { "dynos" => 1 })
+        mock_api.should_not_receive(:post_ps_scale)
+        subject.scale!.should be_nil
+      end
+
+      it "should skip if scaled too recently" do
+        subject.instance_variable_set :@last_scaled_at, (Time.now - 175)
         mock_api.should_not_receive(:post_ps_scale)
         subject.scale!.should be_nil
       end
@@ -99,12 +107,19 @@ describe Heroku::Scalr::App do
       before { subject.metric.stub by: 1 }
 
       it "should return the new number of dynos" do
+        subject.instance_variable_set :@last_scaled_at, (Time.now - 35)
         mock_api.should_receive(:post_ps_scale).with("name", "web", 3).and_return mock_response(200, "")
         subject.scale!.should == 3
       end
 
       it "should skip if max number of dynos reached" do
         mock_api.should_receive(:get_app).with("name").and_return mock_response(200, { "dynos" => 3 })
+        mock_api.should_not_receive(:post_ps_scale)
+        subject.scale!.should be_nil
+      end
+
+      it "should skip if scaled too recently" do
+        subject.instance_variable_set :@last_scaled_at, (Time.now - 25)
         mock_api.should_not_receive(:post_ps_scale)
         subject.scale!.should be_nil
       end
